@@ -1,0 +1,26 @@
+#!/usr/bin/perl
+
+use DBI;
+
+$sessions_table = <<EOF;
+  CREATE TABLE sessions (
+    session      CHAR(27) NOT NULL,
+    session_data BLOB,
+    created      INT UNSIGNED NOT NULL,
+
+    PRIMARY KEY (session),
+    INDEX (created)
+  )
+EOF
+
+my $dbh = DBI->connect('dbi:mysql:sessions', 'root', undef )
+  or die $DBI::errstr;
+$dbh->{PrintError} = 0;
+$dbh->{RaiseError} = 0;
+
+$dbh->do('DROP TABLE sessions');
+
+$dbh->{RaiseError} = 1;
+
+$dbh->do( $sessions_table );
+$dbh->disconnect;

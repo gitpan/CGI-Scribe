@@ -1,0 +1,24 @@
+#!/usr/bin/perl
+
+# display the server-side contents of a DBI-based session
+
+$DB_SOURCE = 'dbi:mysql:sessions';
+$DB_AUTH   = 'root:';
+$DEBUG     = 0;
+
+use strict;
+use vars qw( $DB_SOURCE $DB_AUTH $DEBUG );
+use Data::Dumper;
+use CGI::Scribe::DBI;
+
+my $session = shift @ARGV or die "Usage: $0 <session-id>\n";
+
+my %session;
+tie %session, 'CGI::Scribe::DBI', $session, {
+                                              db_source => $DB_SOURCE,
+                                              db_auth   => $DB_AUTH,
+                                              debug     => $DEBUG,
+                                            }; 
+
+$Data::Dumper::Varname = $session;
+print Data::Dumper->Dump( [ \%session ] );

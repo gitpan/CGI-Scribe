@@ -1,0 +1,11 @@
+Revision history for Perl extension CGI::Scribe.
+
+0.03  Mon Jul 19 21:05:36 PDT 1999
+	- fix for child processes inheriting srand() seed
+
+0.02  Mon May 17 21:34:00 PDT 1999
+        - added EXISTS support to tied interface
+
+0.01  Sun May  2 19:35:56 1999
+	- original version; created by h2xs 1.18
+

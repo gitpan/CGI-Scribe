@@ -1,0 +1,63 @@
+#!/usr/bin/perl
+
+$DB_SOURCE = 'dbi:mysql:sessions';
+$DB_AUTH   = 'root:';
+
+use strict;
+use vars qw( $DB_SOURCE $DB_AUTH );
+use CGI::Scribe::DBI;          
+use Benchmark;
+
+my %data = (
+             first_name    => 'Maurice',
+             last_name     => 'Aubrey',
+             registration  => 41222,
+             authenticated => 1,
+             frames        => 0,
+           );
+
+my $session = new CGI::Scribe::DBI( undef,
+                                    { db_source => $DB_SOURCE,
+                                      db_auth   => $DB_AUTH } );
+my $id = $session->session;
+foreach my $key (keys %data) {
+  $session->param( $key, $data{ $key } );
+}
+my $cookie = $session->cookie(qw( first_name last_name authenticated ));
+undef $session;
+
+timethese( 10000, 
+  {
+    'server_read' => sub {
+                           my $scribe = new CGI::Scribe::DBI($id, 
+                             {
+                               db_source => $DB_SOURCE,
+                               db_auth   => $DB_AUTH,
+                             }
+                           );
+                           $scribe->param('first_name');
+ 
+                         }, 
+    'cookie_read' => sub {
+                           my $scribe = new CGI::Scribe::DBI(undef, 
+                             {
+                               db_source => 'dbi:mysql:sessions',
+                               db_auth   => 'root:',
+                               cookie    => $cookie 
+                             }
+                           );  
+                           $scribe->param('first_name');
+                         },
+    'server_cookie_read' => sub {
+                                  my $scribe = new CGI::Scribe::DBI(undef, 
+                                    {
+                                       db_source => 'dbi:mysql:sessions',
+                                       db_auth   => 'root:',
+                                       cookie    => $cookie 
+                                    }
+                                  );
+                                  $scribe->param('frames');           
+                                }, 
+           
+  }
+);
